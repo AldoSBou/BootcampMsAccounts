@@ -9,13 +9,13 @@ import java.util.Date;
 
 public class ActiveAccountCreationDTO {
 
-    @NotBlank(message = "El productDefinitionId es obligatorio")
-    private String productDefinitionId;
+    @NotBlank(message = "El productId es obligatorio")
+    private String productId;
 
     @NotBlank(message = "El customerId es obligatorio")
     private String customerId;
 
-    @NotBlank(message = "El accountIdentifier es obligatorio")
+    @NotBlank(message = "El accountNumber es obligatorio")
     private String accountIdentifier;
 
     @NotNull(message = "El creditLimit es obligatorio")

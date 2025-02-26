@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: API de Contratos de Crédito
+  version: 1.0.0
+servers:
+  - url: http://localhost:8082 #  URL base de tu API
+
+paths:
+  /credit-contracts:
+    post:
+      summary: Contratar un nuevo producto de crédito
+      description: Endpoint para crear un nuevo contrato de producto de crédito para un cliente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditContractRequestDTO'
+      responses:
+        '201': # Respuesta de CREACIÓN exitosa
+          description: Contrato de crédito creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditContractResponseDTO' #  Referencia al DTO de respuesta EXITOSA
+        '400': # Respuesta de SOLICITUD INVÁLIDA
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO' # Referencia al DTO de respuesta de ERROR
+
+components:
+  schemas:
+    CreditContractRequestDTO: # DTO para la petición
+      type: object
+      required:
+        - productId
+        - customerId
+        - creditLimit
+      properties:
+        productId:
+          type: string
+          description: Identificador del producto de crédito a contratar.
+          example: "CONSUMO_PERSONAL"
+        customerId:
+          type: string
+          description: Identificador único del cliente.
+          example: "CLIENTE_123"
+        creditLimit:
+          type: number
+          format: double
+          description: Límite de crédito solicitado.
+          example: 10000.50
+        accountIdentifier:
+          type: string
+          description: Identificador de cuenta bancaria del cliente (opcional).
+          example: "CUENTA_456"
+        cardNumber:
+          type: string
+          description: Número de tarjeta (si aplica, para tarjetas de crédito).
+          example: "XXXXXXXXXXXXXXXX1234"
+        expiryDate:
+          type: string
+          description: Fecha de expiración de la tarjeta (si aplica).
+          example: "2024-12-31"
+        cardType:
+          type: string
+          description: Tipo de tarjeta (si aplica).
+          example: "CREDITO"
+
+    CreditContractResponseDTO: # DTO para la respuesta EXITOSA
+      type: object
+      properties:
+        accountNumber:
+          type: string
+          description: Número de cuenta generado para el contrato de crédito.
+          example: "CC-2024-123456"
+        contractDetails:
+          $ref: '#/components/schemas/CreditContractDetailsDTO'
+
+    CreditContractDetailsDTO: # DTO para los detalles del contrato (anidado en la respuesta exitosa)
+      type: object
+      properties:
+        productId:
+          type: string
+          description: Identificador del producto contratado.
+          example: "CONSUMO_PERSONAL"
+        customerId:
+          type: string
+          description: Identificador del cliente.
+          example: "CLIENTE_123"
+        creditLimit:
+          type: number
+          format: double
+          description: Límite de crédito otorgado.
+          example: 10000.00
+        accountStatus:
+          type: string
+          description: Estado inicial de la cuenta.
+          example: "ACTIVE"
+
+    ErrorResponseDTO: # DTO para respuestas de ERROR
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Código de error.
+          example: "INVALID_REQUEST"
+        message:
+          type: string
+          description: Mensaje descriptivo del error.
+          example: "El campo 'productId' es obligatorio."
