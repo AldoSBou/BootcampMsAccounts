@@ -1,0 +1,40 @@
+2025-02-28 13:01:20.838 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.bootcamp.btmsaccounts.controller.AccountControllerTest]: AccountControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-02-28 13:01:21.191 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.bootcamp.btmsaccounts.MsAccountsApplication for test class com.bootcamp.btmsaccounts.controller.AccountControllerTest
+2025-02-28 13:01:21.844 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-02-28 13:01:22.631 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Fetching config from server at : http://localhost:9001
+2025-02-28 13:01:23.470 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Located environment: name=bt-ms-accounts, profiles=[dev], label=null, version=c2c892c4a5466206eb8353f66864ddf3b15255e8, state=
+2025-02-28 13:01:23.471 [main] INFO  o.s.c.b.c.PropertySourceBootstrapConfiguration - Located property source: [BootstrapPropertySource {name='bootstrapProperties-configClient'}, BootstrapPropertySource {name='bootstrapProperties-https://github.com/AldoSBou/BootcampConfigServerFiles/bt-ms-accounts-dev.yml'}]
+2025-02-28 13:01:23.486 [main] INFO  c.b.b.c.AccountControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-02-28 13:01:26.399 [main] INFO  c.b.b.c.AccountControllerTest - Started AccountControllerTest in 5.046 seconds (process running for 7.481)
+2025-02-28 13:01:26.586 [main] DEBUG o.s.w.r.f.client.ExchangeFunctions - [15d313d3] HTTP POST /api/accounts/1213123412321/balance
+2025-02-28 13:01:26.955 [parallel-1] DEBUG o.s.w.r.f.client.ExchangeFunctions - [15d313d3] [737bc0a4] Response 202 ACCEPTED
+2025-02-28 17:44:53.097 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.bootcamp.btmsaccounts.controller.AccountControllerTest]: AccountControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-02-28 17:44:53.383 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.bootcamp.btmsaccounts.MsAccountsApplication for test class com.bootcamp.btmsaccounts.controller.AccountControllerTest
+2025-02-28 17:44:53.996 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-02-28 17:44:54.761 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Fetching config from server at : http://localhost:9001
+2025-02-28 17:44:54.888 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Exception on Url - http://localhost:9001:org.springframework.web.client.ResourceAccessException: I/O error on GET request for "http://localhost:9001/bt-ms-accounts/dev": Connection refused: getsockopt. Will be trying the next url if available
+2025-02-28 17:44:54.888 [main] WARN  o.s.c.c.c.ConfigServicePropertySourceLocator - Could not locate PropertySource: I/O error on GET request for "http://localhost:9001/bt-ms-accounts/dev": Connection refused: getsockopt
+2025-02-28 17:44:54.900 [main] INFO  c.b.b.c.AccountControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-02-28 17:44:57.661 [main] INFO  c.b.b.c.AccountControllerTest - Started AccountControllerTest in 4.103 seconds (process running for 6.185)
+2025-02-28 17:44:57.832 [main] DEBUG o.s.w.r.f.client.ExchangeFunctions - [12a16e42] HTTP POST /api/accounts/1213123412321/balance
+2025-02-28 17:44:58.204 [parallel-1] DEBUG o.s.w.r.f.client.ExchangeFunctions - [12a16e42] [45a051e8] Response 202 ACCEPTED
+2025-02-28 17:50:17.795 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.bootcamp.btmsaccounts.controller.AccountControllerTest]: AccountControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-02-28 17:50:18.009 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.bootcamp.btmsaccounts.MsAccountsApplication for test class com.bootcamp.btmsaccounts.controller.AccountControllerTest
+2025-02-28 17:50:18.669 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-02-28 17:50:19.434 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Fetching config from server at : http://localhost:9001
+2025-02-28 17:50:19.579 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Located environment: name=bt-ms-accounts, profiles=[dev], label=null, version=4b251e7ac8020d87428778d033b509196b2ee08d, state=
+2025-02-28 17:50:19.580 [main] INFO  o.s.c.b.c.PropertySourceBootstrapConfiguration - Located property source: [BootstrapPropertySource {name='bootstrapProperties-configClient'}, BootstrapPropertySource {name='bootstrapProperties-https://github.com/AldoSBou/BootcampConfigServerFiles/bt-ms-accounts-dev.yml'}]
+2025-02-28 17:50:19.594 [main] INFO  c.b.b.c.AccountControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-02-28 17:50:22.111 [main] INFO  c.b.b.c.AccountControllerTest - Started AccountControllerTest in 3.935 seconds (process running for 5.906)
+2025-02-28 17:50:22.293 [main] DEBUG o.s.w.r.f.client.ExchangeFunctions - [4f944ff5] HTTP POST /api/accounts/1213123412321/balance
+2025-02-28 17:50:22.658 [parallel-1] DEBUG o.s.w.r.f.client.ExchangeFunctions - [4f944ff5] [4d2dd9b0] Response 202 ACCEPTED
+2025-02-28 17:58:31.036 [main] INFO  o.s.t.c.s.AnnotationConfigContextLoaderUtils - Could not detect default configuration classes for test class [com.bootcamp.btmsaccounts.controller.AccountControllerTest]: AccountControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2025-02-28 17:58:31.278 [main] INFO  o.s.b.t.c.SpringBootTestContextBootstrapper - Found @SpringBootConfiguration com.bootcamp.btmsaccounts.MsAccountsApplication for test class com.bootcamp.btmsaccounts.controller.AccountControllerTest
+2025-02-28 17:58:31.937 [background-preinit] INFO  o.h.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.2.Final
+2025-02-28 17:58:32.748 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Fetching config from server at : http://localhost:9001
+2025-02-28 17:58:32.872 [main] INFO  o.s.c.c.c.ConfigServicePropertySourceLocator - Located environment: name=bt-ms-accounts, profiles=[dev], label=null, version=4b251e7ac8020d87428778d033b509196b2ee08d, state=
+2025-02-28 17:58:32.873 [main] INFO  o.s.c.b.c.PropertySourceBootstrapConfiguration - Located property source: [BootstrapPropertySource {name='bootstrapProperties-configClient'}, BootstrapPropertySource {name='bootstrapProperties-https://github.com/AldoSBou/BootcampConfigServerFiles/bt-ms-accounts-dev.yml'}]
+2025-02-28 17:58:32.886 [main] INFO  c.b.b.c.AccountControllerTest - No active profile set, falling back to 1 default profile: "default"
+2025-02-28 17:58:35.323 [main] INFO  c.b.b.c.AccountControllerTest - Started AccountControllerTest in 3.849 seconds (process running for 5.893)
+2025-02-28 17:58:35.515 [main] DEBUG o.s.w.r.f.client.ExchangeFunctions - [77b3c429] HTTP POST /api/accounts/1213123412321/balance
+2025-02-28 17:58:35.854 [parallel-1] DEBUG o.s.w.r.f.client.ExchangeFunctions - [77b3c429] [65bae768] Response 202 ACCEPTED

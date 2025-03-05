@@ -2,14 +2,18 @@ package com.bootcamp.btmsaccounts.service.impl;
 
 import com.bootcamp.btmsaccounts.client.model.CustomerClient;
 import com.bootcamp.btmsaccounts.client.model.PassiveProductClient;
-import com.bootcamp.btmsaccounts.infrastructure.iwebapi.ICustomerApi;
-import com.bootcamp.btmsaccounts.infrastructure.iwebapi.IProductApi;
+import com.bootcamp.btmsaccounts.dto.*;
+import com.bootcamp.btmsaccounts.infrastructure.iwebapi.*;
 import com.bootcamp.btmsaccounts.model.Account;
 import com.bootcamp.btmsaccounts.repository.IAccountRepository;
 import com.bootcamp.btmsaccounts.repository.IGenericRepository;
+import com.bootcamp.btmsaccounts.service.IAccountHolderService;
 import com.bootcamp.btmsaccounts.service.IAccountService;
+import com.bootcamp.btmsaccounts.service.ICreditService;
+import com.bootcamp.btmsaccounts.utils.IMemoryService;
 import com.bootcamp.btmsaccounts.utils.ServiceServiceDiscoveryUtils;
 import com.bootcamp.btmsaccounts.utils.constans.AccountConstans.AccountType;
+import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +21,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,12 +34,18 @@ import java.util.Map;
 public class AccountServiceImpl extends GenericServiceImpl<Account,String> implements IAccountService {
 
     private final IAccountRepository accountRepository;
+    private final IAccountHolderService accountHolderService;
     private final ServiceServiceDiscoveryUtils discoveryClient;
     private final ICustomerApi customerApi;
     private final IProductApi productApi;
+    private final IMemoryService memoryService;
+    private final ICreditService creditService;
+    private final ITransferApi transferApi;
 
     @Override
-    protected IGenericRepository<Account,String> getRepository() { return accountRepository; }
+    protected IGenericRepository<Account, String> getRepository() {
+        return accountRepository;
+    }
 
     @Override
     public Flux<Account> getAccountsByCustomer(String idCustomer) {
@@ -38,7 +53,6 @@ public class AccountServiceImpl extends GenericServiceImpl<Account,String> imple
     }
 
     private Mono<Boolean> loadClientInformation(String customerIdentifier,
-                                                String productServiceInstance,
                                                 Account account,
                                                 Mono<CustomerClient> customerDataMono,
                                                 Map<String, PassiveProductClient> productMap) {
@@ -60,35 +74,30 @@ public class AccountServiceImpl extends GenericServiceImpl<Account,String> imple
                     if (customerServiceInstances.isEmpty()) {
                         return Mono.error(new RuntimeException("No se encontraron instancias para bt-ms-customers"));
                     }
+
                     String customerIdentifier = account.getCustomerId();
                     Mono<CustomerClient> customerDataMono =
                             customerApi.getCustomerInformation(customerServiceInstances, customerIdentifier);
-                            log.info("Customer information: {}", customerDataMono);
-                    return discoveryClient.getDiscoveryInstances("bt-ms-products")
-                            .flatMap(productServiceInstances -> {
-                                if (productServiceInstances.isEmpty()) {
-                                    return Mono.error(new RuntimeException("No se encontraron instancias para bt-ms-products"));
-                                }
-                                Flux<PassiveProductClient> existingProductsFlux = productApi.getAllProductsInformation(productServiceInstances);
-                                Mono<Map<String, PassiveProductClient>> productMapMono = existingProductsFlux.collectMap(PassiveProductClient::getId, passiveProductClient -> passiveProductClient);
-
-                                log.info("productMapMono information: {}", existingProductsFlux.map(e -> {
-                                    System.out.println(e.toString());
-                                    return e;
-                                }));
+                    log.info("Customer information: {}", customerDataMono.map(res -> {
+                        System.out.println(res.toString());
+                        return res;
+                    }));
 
 
-                                return productMapMono.flatMap(productMap -> {
-                                    Mono<Boolean> isValidPersonalAccountMono = loadClientInformation(customerIdentifier, productServiceInstances, account, customerDataMono, productMap);
+                    return memoryService.getValue("allProducts", new TypeReference<List<PassiveProductClient>>() {
+                            })
+                            .flatMapMany(Flux::fromIterable)
+                            .collectMap(PassiveProductClient::getId, passiveProductClient -> passiveProductClient)
+                            .flatMap(productMap -> {
+                                Mono<Boolean> isValidPersonalAccountMono = loadClientInformation(customerIdentifier, account, customerDataMono, productMap);
 
-                                    return isValidPersonalAccountMono.flatMap(isValid -> {
-                                        if (isValid) {
-                                            return accountRepository.save(account);
-                                        } else {
-                                            log.error("Validación de cuenta falló (validación optimizada con productos en memoria).");
-                                            return Mono.error(new RuntimeException("Fallo validación de cuenta"));
-                                        }
-                                    });
+                                return isValidPersonalAccountMono.flatMap(isValid -> {
+                                    if (isValid) {
+                                        return accountRepository.save(account);
+                                    } else {
+                                        log.error("Validación de cuenta falló (validación optimizada con productos en memoria).");
+                                        return Mono.error(new RuntimeException("Fallo validación de cuenta"));
+                                    }
                                 });
                             });
                 });
@@ -198,13 +207,105 @@ public class AccountServiceImpl extends GenericServiceImpl<Account,String> imple
     }
 
     @Override
-    public Mono<Void> updateAccountBalance(String accountId, String customerId, BigDecimal balance) {
+    public Mono<Void> updateAccountBalance(String accountId, String customerId, Double balance) {
         return accountRepository.findById(accountId)
                 .filter(result -> result.getCustomerId().equals(customerId))
                 .switchIfEmpty(Mono.error(new RuntimeException("Cuenta no encontrada o no pertenece al cliente.")))
                 .flatMap(account -> {
-                    account.setAccountBalance((account.getAccountBalance().add(balance)));
+                    account.setAccountBalance((account.getAccountBalance() + balance));
                     return accountRepository.save(account);
                 }).thenEmpty(Mono.empty());
+    }
+
+    @Override
+    public Mono<AccountTransferResponseDTO> savingTransferLocalPost(Mono<AccountTransferRequestDTO> requestDTO) {
+        return requestDTO
+                .flatMap(request -> accountRepository.findByCustomerId(request.getCustomerId()).collectList()
+                        .flatMap(cuentas -> {
+                            Account originAccount = cuentas
+                                    .stream()
+                                    .filter(e -> e.getAccountNumber().equalsIgnoreCase(request.getOriginAccountNumber())).findFirst().orElse(null);
+                            Account targetAccount = cuentas
+                                    .stream()
+                                    .filter(e -> e.getAccountNumber().equalsIgnoreCase(request.getTargetAccountNumber())).findFirst().orElse(null);
+                            if (originAccount == null || targetAccount == null) {
+                                return Mono.error(new IllegalArgumentException("Una o ambas cuentas no existen"));
+                            }
+                            if (originAccount.getAccountBalance() < request.getTransferAmount()) {
+                                return Mono.error(new IllegalArgumentException("Saldo insuficiente en la cuenta de origen"));
+                            }
+                            // Realizar la transferencia
+                            targetAccount.setAccountBalance(targetAccount.getAccountBalance() + request.getTransferAmount());
+                            originAccount.setAccountBalance(originAccount.getAccountBalance() + (request.getTransferAmount() * -1));
+                            return accountRepository.save(originAccount)
+                                    .then(accountRepository.save(targetAccount))
+                                    .map(e -> {
+                                        AccountTransferResponseDTO responseDTO = new AccountTransferResponseDTO();
+                                        responseDTO.setValidationStatus("Solicitud Aprobada");
+                                        responseDTO.setValidationDate(LocalDate.now().toString());
+                                        return responseDTO;
+                                    });
+                        })
+                );
+    }
+
+    @Override
+    public Mono<AccountsConsolidateResponseDTO> allProductsByCustomerId(String customerId) {
+
+        Flux<PassiveProductDTO> passiveFlux = accountRepository.findByCustomerId(customerId)
+                .map(account -> {
+                    PassiveProductDTO passive = new PassiveProductDTO();
+                    passive.setAccountBalance(account.getAccountBalance());
+                    passive.setCustomerId(account.getCustomerId());
+                    passive.setProductId(account.getProductId());
+                    passive.setAccountNumber(account.getAccountNumber());
+                    passive.setAccountStatus(account.getAccountStatus());
+                    passive.setAccountCreationDate(account.getAccountCreationDate());
+                    return passive;
+                });
+
+        Flux<ActiveProductDTO> activeFlux = creditService.findByCustomerId(customerId)
+                .map(credit -> {
+                    ActiveProductDTO active = new ActiveProductDTO();
+                    active.setAccountNumber(credit.getAccountNumber());
+                    active.setProductId(credit.getProductId());
+                    active.setAvailableCredit(credit.getAvailableCredit().doubleValue());
+                    active.setCreationDate(credit.getCreationDate().toString());
+                    active.setCreditSubType(credit.getCreditSubType());
+                    return active;
+                });
+
+        return Mono.zip(passiveFlux.collect(Collectors.toList()), activeFlux.collect(Collectors.toList()))
+                .map(tuple -> {
+                    AccountsConsolidateResponseDTO responseDTO = new AccountsConsolidateResponseDTO();
+                    responseDTO.setPassiveProducts(tuple.getT1());
+                    responseDTO.setActiveProducts(tuple.getT2());
+                    return responseDTO;
+                });
+    }
+
+    @Override
+    public Mono<AccountCommissionsDTO> accountCommissions(String accountId, String startDate, String endDate) {
+        return discoveryClient.getDiscoveryInstances("bt-ms-transfers")
+                .flatMap(transfersApi -> {
+                    if (transfersApi.isEmpty()) {
+                        return Mono.error(new RuntimeException("No se encontraron instancias para bt-ms-transfers"));
+                    }
+                    Flux<CommissionDTO> transfer = transferApi.getAllTransfersByAccountId(transfersApi, accountId, startDate,endDate)
+                            .map(transferClient -> {
+                                CommissionDTO commissionDTO = new CommissionDTO();
+                                commissionDTO.setAmount(transferClient.getCommission());
+                                commissionDTO.setDescription(transferClient.getDescription());
+                                commissionDTO.setCollectionDate(transferClient.getMovementDate());
+                                return commissionDTO;
+                            }).filter(e -> !Objects.isNull(e.getAmount()));
+
+                    return transfer.collect(Collectors.toList())
+                            .map(transfers -> {
+                                AccountCommissionsDTO responseDTO = new AccountCommissionsDTO();
+                                responseDTO.setCommissions(transfers);
+                                return responseDTO;
+                            });
+                });
     }
 }

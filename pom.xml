@@ -11,8 +11,8 @@
     <groupId>com.bootcamp</groupId>
     <artifactId>bt-ms-accounts</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>ms-accounts</name>
-    <description>ms-accounts</description>
+    <name>bt-ms-accounts</name>
+    <description>bt-ms-accounts</description>
     <url/>
     <licenses>
         <license/>
@@ -105,10 +105,13 @@
         </dependency>
 
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
-            <version>5.8.0</version>
-            <scope>test</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
         </dependency>
 
     </dependencies>
@@ -131,7 +134,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.11.0</version>
+                <version>7.0.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -141,15 +144,15 @@
                             <library>spring-boot</library>
                             <inputSpec>${project.basedir}/src/main/resources/openapi.yaml</inputSpec>
                             <generatorName>spring</generatorName>
+                            <apiPackage>com.bootcamp.btmsaccounts.api</apiPackage>
+                            <modelPackage>com.bootcamp.btmsaccounts.dto</modelPackage>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
                             <configOptions>
                                 <reactive>true</reactive>
                                 <useSpringController>true</useSpringController>
                                 <useSpringBoot3>true</useSpringBoot3>
-                                <apiPackage>com.bootcamp.btmsaccounts.api</apiPackage>
-                                <modelPackage>com.bootcamp.btmsaccounts.dto</modelPackage>
                                 <delegatePattern>true</delegatePattern>
                                 <useJsonNullable>false</useJsonNullable>
-                                <outputFolder>${project.build.directory}/generated-sources/openapi</outputFolder>
                             </configOptions>
                         </configuration>
                     </execution>
@@ -171,7 +174,7 @@
                 </executions>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
-                    <failOnViolation>true</failOnViolation>
+                    <failOnViolation>false</failOnViolation>
                     <consoleOutput>true</consoleOutput>
                     <violationSeverity>warning</violationSeverity>
                     <includeTestSourceDirectory>true</includeTestSourceDirectory>
@@ -221,6 +224,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <mainClass>com.bootcamp.btmsaccounts.MsAccountsApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>

@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PassiveAccountQueryResponseDTO {
+public class PassiveAccountResponseDTO {
 
     private String id;
     private String productId;

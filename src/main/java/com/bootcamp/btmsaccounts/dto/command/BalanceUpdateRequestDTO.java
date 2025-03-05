@@ -12,6 +12,6 @@ import java.math.BigDecimal;
 public class BalanceUpdateRequestDTO {
 
     private String customerId;
-    private BigDecimal balance;
+    private Double balance;
     //private String transactionType;
 }

@@ -12,6 +12,7 @@ import com.bootcamp.btmsaccounts.service.ICreditCardService;
 import com.bootcamp.btmsaccounts.service.ICreditService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -44,7 +45,6 @@ public class CreditServiceImpl extends GenericServiceImpl<Credit, String> implem
                     return creditCardService.save(creditCard)
                             .flatMap(savedCreditCard -> {
 
-                                // 3. Create Credit object using data from CreditRequest and saved CreditCard
                                 Credit saveTCCredit = new Credit();
                                 saveTCCredit.setProductId(creditReq.getProductId());
                                 saveTCCredit.setCreationDate(LocalDate.now());
@@ -52,26 +52,36 @@ public class CreditServiceImpl extends GenericServiceImpl<Credit, String> implem
                                 saveTCCredit.setCustomerId(creditReq.getCustomerId());
                                 saveTCCredit.setCreditLimit(creditReq.getCreditLimit());
                                 saveTCCredit.setAvailableCredit(creditReq.getCreditLimit());
-                                saveTCCredit.setCreditSubType("LOAN - CREDIT");
-                                saveTCCredit.setIdCreditCard(savedCreditCard.getId()); // Link Credit to saved CreditCard
+                                saveTCCredit.setCreditSubType("CREDIT CARD");
+                                saveTCCredit.setIdCreditCard(savedCreditCard.getId());
 
                                 // 4. Save Credit object
                                 return creditRepository.save(saveTCCredit);
                             })
-                            .map(savedCredit -> { // 5. Map to CreditContractResponseDTO
+                            .map(savedCredit -> {
 
-                                // 6. Create CreditContractResponseDTO
                                 CreditContractResponseDTO responseDTO = new CreditContractResponseDTO();
-                                responseDTO.setAccountNumber("1239123821381"); // Consider where Account Number comes from
+                                responseDTO.setAccountNumber("1239123821381");
 
                                 CreditContractDetailsDTO detailsDTO = new CreditContractDetailsDTO();
                                 detailsDTO.setCustomerId(creditReq.getCustomerId());
                                 detailsDTO.setProductId(creditReq.getProductId());
                                 detailsDTO.setCreditLimit(creditReq.getCreditLimit());
+                                detailsDTO.setAccountStatus("ACTIVE");
                                 responseDTO.setContractDetails(detailsDTO);
 
                                 return responseDTO;
                             });
                 });
+    }
+
+    @Override
+    public Mono<Credit> findByIdCreditCard(String idCreditCard) {
+        return creditRepository.findByIdCreditCard(idCreditCard);
+    }
+
+    @Override
+    public Flux<Credit> findByCustomerId(String customerId) {
+        return creditRepository.findByCustomerId(customerId);
     }
 }

@@ -3,6 +3,6 @@ spring:
     name: bt-ms-accounts
   cloud:
     config:
-      uri: http://localhost:9001
+      uri: ${CONFIG.SERVER.HOSTNAME:http://localhost:9001}
       profile: dev
       enabled: true

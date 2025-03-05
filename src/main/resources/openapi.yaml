@@ -1,15 +1,31 @@
 openapi: 3.0.0
 info:
-  title: API de Contratos de Crédito
-  version: 1.0.0
+  title: API de Servicios Bancarios (Créditos y Cuentas de Ahorro)
+  version: 1.2.0
+
+tags:
+  - name: CreditContracts
+    description: Operaciones relacionadas con la gestión de contratos de crédito.
+  - name: BalanceInquiries
+    description: Operaciones para consultar saldos bancarios y de crédito.
+  - name: SavingsAccounts
+    description: Operaciones para la gestión de cuentas de ahorro (apertura, etc.).
+  - name: CreditCardTransactions
+    description: Operaciones relacionadas con transacciones de tarjetas de crédito.
+  - name: SavingValidateTransfers
+    description: Operaciones para la validacion de transferencias locales y a terceros
+
+
 servers:
-  - url: http://localhost:8082 #  URL base de tu API
+  - url: http://localhost:8082
 
 paths:
-  /credit-contracts:
+  /credit-card:
     post:
       summary: Contratar un nuevo producto de crédito
       description: Endpoint para crear un nuevo contrato de producto de crédito para un cliente.
+      tags:
+        - CreditContracts
       requestBody:
         required: true
         content:
@@ -17,22 +33,227 @@ paths:
             schema:
               $ref: '#/components/schemas/CreditContractRequestDTO'
       responses:
-        '201': # Respuesta de CREACIÓN exitosa
+        '201':
           description: Contrato de crédito creado exitosamente
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreditContractResponseDTO' #  Referencia al DTO de respuesta EXITOSA
+                $ref: '#/components/schemas/CreditContractResponseDTO'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /credit-card/{cardNumber}/balance:
+    get:
+      summary: Consultar saldo de producto de crédito
+      description: Endpoint para obtener el saldo actual de un producto de crédito específico.
+      tags:
+        - BalanceInquiries
+      parameters:
+        - in: path
+          name: cardNumber
+          required: true
+          description: Identificador único del producto de crédito.
+          schema:
+            type: string
+      responses:
+        '200': # Respuesta EXITOSA - Saldo encontrado
+          description: Saldo de crédito obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponseDTO' # DTO para la respuesta de saldo
         '400': # Respuesta de SOLICITUD INVÁLIDA
           description: Solicitud inválida
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponseDTO' # Referencia al DTO de respuesta de ERROR
+                $ref: '#/components/schemas/ErrorResponseDTO' # DTO de error
+        '404': # Respuesta de NO ENCONTRADO
+          description: Producto de crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO' # DTO de error
+
+  /saving/{accountId}/balance: # Nuevo endpoint para consultar saldo de cuenta bancaria
+    get:
+      summary: Consultar saldo de cuenta bancaria
+      description: Endpoint para obtener el saldo actual de una cuenta bancaria.
+      tags:
+        - BalanceInquiries
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          description: Identificador único del producto de cuenta.
+          schema:
+            type: string
+      responses:
+        '200': # Respuesta EXITOSA - Saldo encontrado
+          description: Saldo de cuenta bancaria obtenido exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponseDTO' # DTO para la respuesta de saldo
+        '400': # Respuesta de SOLICITUD INVÁLIDA
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO' # DTO de error
+        '404': # Respuesta de NO ENCONTRADO
+          description: Cuenta bancaria no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO' # DTO de error
+
+  /credit-card/{cardNumber}/transactions:
+    post:
+      summary: Generar consumo en tarjeta de crédito
+      description: Endpoint para registrar una transacción (consumo) en una tarjeta de crédito, validando la línea disponible.
+      tags:
+        - CreditCardTransactions
+      parameters:
+        - in: path
+          name: cardNumber
+          required: true
+          description: Número de tarjeta de crédito donde se realizará el consumo.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCardTransactionRequestDTO'
+      responses:
+        '201': # Transacción creada exitosamente
+          description: Transacción de tarjeta de crédito registrada exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCardTransactionResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Límite de crédito excedido. Saldo insuficiente para realizar la transacción.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /saving/transfer/local:
+    post:
+      summary: Validar transferencia entre cuentas
+      description: Endpoint para realizar la validacion de una transferencia local
+      tags:
+        - SavingValidateTransfers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountTransferRequestDTO'
+      responses:
+        '200':
+          description: Validacion de cuentas correcta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountTransferResponseDTO'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+  /reporting/{customerId}/consolidate:
+    get:
+      summary: Reporte consolidado de cuentas
+      description: Endpoint para realizar una búsqueda de productos del cliente
+      tags:
+        - ReportingAccountsConsolidate
+      parameters:
+        - in: path
+          name: customerId
+          required: true
+          description: Identificador de Cliente
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Validación de cuentas correcta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountsConsolidateResponseDTO'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+
+
+  /reporting/{accountId}/commission:
+    get:
+      summary: Obtiene el reporte de comisiones para una cuenta específica.
+      description: Endpoint para realizar una búsqueda de comisiones por cuenta.
+      tags:
+        - ReportingAccountsConsolidate
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID de la cuenta.
+        - name: startDate
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Fecha de inicio del reporte (YYYY-MM-DD).
+        - name: endDate
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Fecha de fin del reporte (YYYY-MM-DD).
+      responses:
+        '200':
+          description: Reporte de comisiones obtenido exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountCommissionsDTO'
+        '400':
+          description: Solicitud inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
+        '500':
+          description: Error interno del servidor.
+
 
 components:
+  responses:
+    BadRequestResponse:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponseDTO'
+
   schemas:
-    CreditContractRequestDTO: # DTO para la petición
+    CreditContractRequestDTO:
       type: object
       required:
         - productId
@@ -49,9 +270,9 @@ components:
           example: "CLIENTE_123"
         creditLimit:
           type: number
-          format: double
+          format: decimal
           description: Límite de crédito solicitado.
-          example: 10000.50
+          example: 10000.00
         accountIdentifier:
           type: string
           description: Identificador de cuenta bancaria del cliente (opcional).
@@ -62,6 +283,7 @@ components:
           example: "XXXXXXXXXXXXXXXX1234"
         expiryDate:
           type: string
+          format: string
           description: Fecha de expiración de la tarjeta (si aplica).
           example: "2024-12-31"
         cardType:
@@ -69,7 +291,7 @@ components:
           description: Tipo de tarjeta (si aplica).
           example: "CREDITO"
 
-    CreditContractResponseDTO: # DTO para la respuesta EXITOSA
+    CreditContractResponseDTO:
       type: object
       properties:
         accountNumber:
@@ -79,7 +301,7 @@ components:
         contractDetails:
           $ref: '#/components/schemas/CreditContractDetailsDTO'
 
-    CreditContractDetailsDTO: # DTO para los detalles del contrato (anidado en la respuesta exitosa)
+    CreditContractDetailsDTO:
       type: object
       properties:
         productId:
@@ -92,7 +314,7 @@ components:
           example: "CLIENTE_123"
         creditLimit:
           type: number
-          format: double
+          format: decimal
           description: Límite de crédito otorgado.
           example: 10000.00
         accountStatus:
@@ -100,7 +322,7 @@ components:
           description: Estado inicial de la cuenta.
           example: "ACTIVE"
 
-    ErrorResponseDTO: # DTO para respuestas de ERROR
+    ErrorResponseDTO:
       type: object
       required:
         - code
@@ -114,3 +336,204 @@ components:
           type: string
           description: Mensaje descriptivo del error.
           example: "El campo 'productId' es obligatorio."
+
+    CreditBalanceRequestDTO:
+      type: object
+      required:
+        - creditId
+      properties:
+        creditId:
+          type: string
+          description: Identificador único del producto de crédito.
+          example: "CR-2024-789"
+
+    AccountBalanceRequestDTO: # NUEVO DTO para solicitar saldo de cuenta bancaria
+      type: object
+      required:
+        - accountId
+      properties:
+        accountId:
+          type: string
+          description: Identificador único de la cuenta bancaria.
+          example: "AC-2024-456"
+
+    BalanceResponseDTO:
+      type: object
+      required:
+        - balance
+      properties:
+        balance:
+          type: number
+          format: decimal
+          description: Saldo actual disponible.
+          example: 1250.75
+
+    CreditCardTransactionRequestDTO:
+      type: object
+      required:
+        - description
+        - amount
+        - transactionDate
+        - cardCvv
+        - cardExpiryDate
+      properties:
+        description:
+          type: string
+          description: Descripción de la operación o comercio donde se realiza el consumo.
+          example: "Compra en Supermercado XYZ"
+        amount:
+          type: number
+          format: decimal
+          description: Monto del consumo a registrar.
+          example: 75.50
+        transactionDate:
+          type: string
+          description: Fecha y hora de la transacción.
+          example: "2024-03-16T14:30:00Z"
+        cardCvv:
+          type: string
+          description: Código de seguridad CVV de la tarjeta de crédito (para validación).
+          example: "123"
+          minLength: 3 # Longitud mínima típica de CVV
+          maxLength: 3 # Longitud máxima típica de CVV
+        cardExpiryDate:
+          type: string
+          description: Fecha de expiración de la tarjeta de crédito (para validación).
+          example: "2025-12-01"
+
+    CreditCardTransactionResponseDTO:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          description: Identificador único de la transacción generada.
+          example: "TX-CC-2024-0316-12345"
+        transactionStatus:
+          type: string
+          description: Estado de la transacción
+          example: "APPROVED"
+        availableCreditLine:
+          type: number
+          format: decimal
+          description: Línea de crédito disponible restante después de la transacción.
+          example: 924.50
+
+    AccountTransferRequestDTO:
+      type: object
+      required:
+        - customerId
+        - originAccountNumber
+        - targetAccountNumber
+        - transferAmount
+      properties:
+        customerId:
+          type: string
+          description: Identificador único del cliente.
+          example: "67b8d824fb8b3a1b36d19af1"
+        originAccountNumber:
+          type: string
+          description: Cuenta de origen transferencia cuentas propias
+          example: "1234512312323"
+        targetAccountNumber:
+          type: string
+          description: Cuenta de destino transferencia cuentas propias
+          example: "1234512312323"
+        transferAmount:
+          type: number
+          format: double
+          description: Monto de la transferencia
+          example: 100.00
+        transferDescription:
+          type: string
+          description: Comentario y/o descripcion de la transferencia
+          example: "Deposito de cuenta hoy"
+
+    AccountTransferResponseDTO:
+      type: object
+      properties:
+        validationStatus:
+          type: string
+          description: Indica el estado de la transferencia
+          example: "Transferencia entre cuentas Aprobado"
+        validationDate:
+          type: string
+          description: Indica la fecha de validacion
+          example: "2025-02-13"
+
+    AccountsConsolidateResponseDTO:
+      type: object
+      properties:
+        passiveProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/PassiveProductDTO'
+        activeProducts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveProductDTO'
+    PassiveProductDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        customerId:
+          type: string
+        accountNumber:
+          type: string
+        accountCreationDate:
+          type: string
+        accountStatus:
+          type: string
+        accountBalance:
+          type: number
+          format: double
+    ActiveProductDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        creationDate:
+          type: string
+        accountNumber:
+          type: string
+        status:
+          type: string
+        customerId:
+          type: string
+        creditLimit:
+          type: number
+          format: double
+        availableCredit:
+          type: number
+          format: double
+        creditSubType:
+          type: string
+        idCreditCard:
+          type: string
+        lastTransactionId:
+          type: string
+
+    AccountCommissionsDTO:
+      type: object
+      properties:
+        commissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommissionDTO'
+    CommissionDTO:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          description: Monto de la comisión.
+        collectionDate:
+          type: string
+          description: Fecha de cobro de la comisión (YYYY-MM-DD).
+        description:
+          type: string
+          description: Descripción de la comisión.

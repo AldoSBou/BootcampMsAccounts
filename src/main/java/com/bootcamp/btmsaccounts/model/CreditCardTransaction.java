@@ -4,20 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Document(collection = "credit_cards")
-public class CreditCard {
-    @Id
-    @EqualsAndHashCode.Include
+@Document(collection = "credit_card_transactions")
+public class CreditCardTransaction {
+
     private String id;
-    private String cardNumber;
-    private String expiryDate;
-    private String cvv;
-    private String cardType;
+    private String description;
+    private BigDecimal amount;
+    private String creditCardNumber;
+    private String transactionStatus;
+    private String createdAt;
+    private String updatedAt;
 }

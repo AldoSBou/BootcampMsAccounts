@@ -20,6 +20,6 @@ public class CustomerApi implements ICustomerApi {
                 .uri(customerServiceUri + "/api/customers/{id}",customerId)
                 .retrieve()
                 .bodyToMono(CustomerClient.class)
-                .onErrorComplete().log();
+                .log();
     }
 }

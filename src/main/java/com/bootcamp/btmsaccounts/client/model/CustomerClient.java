@@ -15,4 +15,5 @@ public class CustomerClient {
         private String email;
         private String documentNumber;
         private CustomerTypeClient customerType;
+        private String customerProfile;
 }

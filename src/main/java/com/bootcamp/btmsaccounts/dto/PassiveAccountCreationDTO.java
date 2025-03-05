@@ -1,5 +1,6 @@
 package com.bootcamp.btmsaccounts.dto;
 
+import com.bootcamp.btmsaccounts.model.AccountHolder;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -30,8 +32,10 @@ public class PassiveAccountCreationDTO {
     @PositiveOrZero(message = "El balance inicial debe ser positivo o cero")
     private BigDecimal accountBalance; // Balance inicial de la cuenta
 
-    private LocalDate accountCreationDate;
+    private String accountCreationDate;
 
     private String accountStatus;
+
+    private List<AccountHolder> holders;
 
 }
