@@ -21,8 +21,8 @@ public class CreditController implements CreditCardApiDelegate {
     private final ICreditCardTransactionService _creditCardTraService;
 
     @PostMapping
-    public Mono<ResponseEntity<CreditContractResponseDTO>> creditContractsPost(@RequestBody Mono<CreditContractRequestDTO>  creditContractRequestDTO,
-                                                                        ServerWebExchange exchange) {
+    public Mono<ResponseEntity<CreditContractResponseDTO>> creditContractsPost(@RequestBody Mono<CreditContractRequestDTO> creditContractRequestDTO,
+                                                                               ServerWebExchange exchange) {
 
         return _creditService.saveTCCredit(creditContractRequestDTO)
                 .map(ResponseEntity::ok);
@@ -42,8 +42,8 @@ public class CreditController implements CreditCardApiDelegate {
     @PostMapping("/{cardNumber}/transaction")
     public Mono<ResponseEntity<CreditCardTransactionResponseDTO>> creditCardCardNumberTransactionsPost(@PathVariable("cardNumber") String cardNumber, @RequestBody
                                                                                                        Mono<CreditCardTransactionRequestDTO> creditCardTransactionRequestDTO,
-                                                                                                       ServerWebExchange exchange){
-        return _creditCardTraService.creditCardTransaction(cardNumber,creditCardTransactionRequestDTO)
+                                                                                                       ServerWebExchange exchange) {
+        return _creditCardTraService.creditCardTransaction(cardNumber, creditCardTransactionRequestDTO)
                 .map(ResponseEntity::ok);
 
     }

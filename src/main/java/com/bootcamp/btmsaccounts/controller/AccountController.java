@@ -78,7 +78,7 @@ public class AccountController implements SavingApiDelegate {
 
     @Override
     @PostMapping("/saving/transfer-local")
-    public Mono<ResponseEntity<AccountTransferResponseDTO>> savingTransferLocalPost(Mono<AccountTransferRequestDTO> transferLocalRequestDTO,
+    public Mono<ResponseEntity<AccountTransferResponseDTO>> savingTransferLocalPost(@RequestBody Mono<AccountTransferRequestDTO> transferLocalRequestDTO,
                                                                            ServerWebExchange exchange){
             return accountService.savingTransferLocalPost(transferLocalRequestDTO)
                     .map(ResponseEntity::ok);

@@ -14,6 +14,8 @@ tags:
     description: Operaciones relacionadas con transacciones de tarjetas de crédito.
   - name: SavingValidateTransfers
     description: Operaciones para la validacion de transferencias locales y a terceros
+  - name: DebitCardTransactions
+    description: Operaciones relacionadas con tarjeta de debito
 
 
 servers:
@@ -241,6 +243,34 @@ paths:
                 $ref: '#/components/schemas/ErrorResponseDTO'
         '500':
           description: Error interno del servidor.
+
+  /debit-card/affiliation:
+    post:
+      summary: Afiliacion tarjeta de debito
+      description: Endpoint para registrar una tarjeta de debito a las cuentas del Cliente
+      tags:
+        - DebitCardTransactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DebitCardAffiliationRequestDTO'
+      responses:
+        '201': # Transacción creada exitosamente
+          description: Transacción de tarjeta de crédito registrada exitosamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DebitCardAffiliationResponseDTO'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '402':
+          description: Límite de crédito excedido. Saldo insuficiente para realizar la transacción.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseDTO'
 
 
 components:
@@ -537,3 +567,58 @@ components:
         description:
           type: string
           description: Descripción de la comisión.
+
+    DebitCardAffiliationRequestDTO:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Identificador de la cuenta principal a la que se asocia la tarjeta de débito.
+        secondaryAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecondaryAccountRequestDTO'
+          description: Lista de cuentas secundarias asociadas a la tarjeta, con su orden de validación.
+        TransactionDate:
+          type: string
+          description: Fecha y hora en que se realiza la solicitud de afiliación.
+        customerId:
+          type: string
+          description: Identificador del cliente que solicita la afiliación.
+        channel:
+          type: string
+          description: Canal a traves del cual se hizo la solicitud.
+        status:
+          type: string
+          description: Cualquier observación adicional sobre la solicitud.
+
+    SecondaryAccountRequestDTO:
+      type: object
+      properties:
+        accountId:
+          type: string
+          description: Identificador de la cuenta secundaria.
+        order:
+          type: integer
+          description: Orden de validación de la cuenta secundaria.
+
+    DebitCardAffiliationResponseDTO:
+      type: object
+      properties:
+        debitCardNumber:
+          type: string
+          description: Número de la tarjeta de débito generada.
+        requestStatus:
+          type: string
+          description: Estado de la solicitud de afiliación.
+        transactionId:
+          type: string
+          description: Identificador único de la transacción en la base de datos.
+        approvalDate:
+          type: string
+          description: Fecha y hora en que se aprobó la solicitud (si aplica).
+        rejectionDetails:
+          type: string
+          description: Motivo del rechazo de la solicitud (si aplica).
+        channel:
+          type: string

@@ -3,6 +3,7 @@ package com.bootcamp.btmsaccounts.utils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -12,6 +13,7 @@ import reactor.core.publisher.Mono;
 public class MemoryService implements IMemoryService {
 
     private final ReactiveRedisTemplate<String, Object> redisTemplate;
+
     private final ObjectMapper objectMapper; // Inyección de dependencia
 
     @Override
