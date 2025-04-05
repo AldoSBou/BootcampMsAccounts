@@ -3,6 +3,8 @@ package com.bootcamp.btmsaccounts.controller;
 import com.bootcamp.btmsaccounts.api.DebitCardApiDelegate;
 import com.bootcamp.btmsaccounts.dto.DebitCardAffiliationRequestDTO;
 import com.bootcamp.btmsaccounts.dto.DebitCardAffiliationResponseDTO;
+import com.bootcamp.btmsaccounts.dto.DebitCardDto;
+import com.bootcamp.btmsaccounts.model.DebitCard;
 import com.bootcamp.btmsaccounts.service.IDebitCardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,15 @@ public class DebitCardController implements DebitCardApiDelegate {
                              ServerWebExchange exchange) {
 
         return debitCardService.saveDebitCard(debitCardAffiliationRequestDTO)
+                .map(e -> ResponseEntity.ok().body(e));
+
+    }
+
+    @GetMapping("/getById/{cardId}")
+    public Mono<ResponseEntity<DebitCard>>
+    debitCardFindById(ServerWebExchange exchange, @PathVariable String cardId) {
+
+        return debitCardService.findById(cardId)
                 .map(e -> ResponseEntity.ok().body(e));
 
     }
